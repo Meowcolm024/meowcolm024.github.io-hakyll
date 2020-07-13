@@ -70,6 +70,35 @@
 <h2 id="code">Code</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1"></a><span class="ot">main ::</span> <span class="dt">IO</span>()</span>
 <span id="cb1-2"><a href="#cb1-2"></a>main <span class="ot">=</span> <span class="fu">putStrLn</span> <span class="st">&quot;Highlighted!&quot;</span></span></code></pre></div>
+<h2 id="html">HTML</h2>
+<h3 id="details">Details?</h3>
+<details>
+ha ha ha!
+</details>
+<h3 id="js">JS</h3>
+<p>Input a Number <input type="number" id="myNumber" value="1" min="1"> <button onclick="fibs()">Calculate Fib</button></p>
+The Fibonacci number is:
+<p id="fib" style="color:purple">
+1
+</p>
+<script>
+function myFunction(){document.getElementById("demo").innerHTML="This is a JS function"; }
+
+function fib(n){
+    if (n <=0) {return 0;}
+    var res = [1,1]
+    if (n==1||n==2) {return 1;}
+    for(var i=2;i<n;i++){
+        res[i] = res[i-1] + res[i-2];
+    }
+    return res[n-1];
+}
+
+function fibs(){
+    var x = document.getElementById("myNumber").value
+    document.getElementById("fib").innerHTML = fib(x);
+}
+</script>
     </section>
 </article>
 
@@ -105,7 +134,8 @@
     <section id="recent-posts-3" class="widget widget_recent_entries">
       <h2 class="widget-title">Recent Posts</h2>
       <ul>
-        <li><a href="../posts/2020-07-09-test.html" title="Test">Test</a></li>
+        <li><a href="../posts/2020-07-12-%E4%B8%AD%E6%96%87%E6%B5%8B%E8%AF%95.html" title="中文测试">中文测试</a></li>
+<li><a href="../posts/2020-07-09-test.html" title="Test">Test</a></li>
 <li><a href="../posts/2020-07-09-hi.html" title="Hi">Hi</a></li>
 
 		  </ul>

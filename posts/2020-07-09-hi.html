@@ -57,7 +57,24 @@
         
     </header>
     <section class="entry-content">
-        <p>Nothing here, but everything starts from here.</p>
+        <p>Something here, and everything starts from here.</p>
+<textarea rows="3" cols="20" id="jsInput">
+let x = 'hi'
+x
+</textarea>
+<button onclick="process()">
+Run
+</button>
+<p>Output:</p>
+<p id="jsOut" style="color:purple">
+output
+</p>
+<script>
+function process(){
+    var x = document.getElementById("jsInput").value
+    document.getElementById("jsOut").innerHTML = eval(x);
+}
+</script>
     </section>
 </article>
 
@@ -93,7 +110,8 @@
     <section id="recent-posts-3" class="widget widget_recent_entries">
       <h2 class="widget-title">Recent Posts</h2>
       <ul>
-        <li><a href="../posts/2020-07-09-test.html" title="Test">Test</a></li>
+        <li><a href="../posts/2020-07-12-%E4%B8%AD%E6%96%87%E6%B5%8B%E8%AF%95.html" title="中文测试">中文测试</a></li>
+<li><a href="../posts/2020-07-09-test.html" title="Test">Test</a></li>
 <li><a href="../posts/2020-07-09-hi.html" title="Hi">Hi</a></li>
 
 		  </ul>
