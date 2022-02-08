@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Applicative Parser</title>
+        <!-- <link rel="stylesheet" href="/css/default.css" /> -->
+        <link rel="stylesheet" href="../css/style.css" />
+        <link href="//s.w.org/wp-includes/css/dashicons.css?20160504" rel="stylesheet" type="text/css">
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600&amp;subset=latin,cyrillic-ext,greek-ext,greek,vietnamese,latin-ext,cyrillic" rel="stylesheet" type="text/css">
+        <link rel="shortcut  icon" href="./images/favicon.ico" type="image/x-icon" />
+    </head>
+    <body class="home blog hfeed has-header-image has-sidebar colors-light">
+      <div id="page" class="site">
+          <header id="masthead" class="site-header" role="banner">
+              <div class="custom-header" style="margin-bottom: 0px;">
+
+	              <div class="custom-header-media">
+	                <div id="wp-custom-header" class="wp-custom-header"><img src="../images/header.jpg" width="2000" height="1200" alt="Theme Preview"></div>		</div>
+
+	                    <div class="site-branding" style="margin-bottom: 0px;">
+	                        <div class="wrap">
+
+	                          <div class="site-branding-text">
+					          <h1 class="site-title"><a href="#link" rel="home">Applicative Parser</a></h1>
+
+						          <p class="site-description">Kara no kyou kai</p>
+				                    </div><!-- .site-branding-text -->
+
+				                      <a href="#content" class="menu-scroll-down"><svg class="icon icon-arrow-right" aria-hidden="true" role="img"> <use href="#icon-arrow-right" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-arrow-right"></use> </svg><span class="screen-reader-text">Scroll down to content</span></a>
+
+	                        </div><!-- .wrap -->
+                      </div><!-- .site-branding -->
+
+              </div>
+        </header>
+
+        <main role="main" class="site-content-contain">
+            <div id="content" class="site-content">
+            <div class="wrap">
+                <header class="page-header">
+  <h2 class="page-title"></h2>
+  <link rel="shortcut  icon" href="./images/favicon.ico" type="image/x-icon" />
+  <link href="../css/syntax.css" rel="stylesheet" />
+</header>
+<div id="primary" class="content-area">
+
+<article class="post type-post status-publish format-standard hentry">
+    <header class="entry-header">
+        <div class="entry-meta">
+            <span class="screen-reader-text">Posted on</span>
+            <a href="#" rel="bookmark">
+                <time class="entry-date published updated" datetime="2008-06-20T20:06:53+00:00">February  8, 2022</time></a>
+        </div>
+        <h3 class="entry-title"><a href="#" rel="bookmark">Applicative Parser</a></h3>
+        
+    </header>
+    <section class="entry-content">
+        <p>This article is only for fun XD</p>
+<p>An applicative parser is less powerful than a monadic parser, but it can almost do what monadic parsers can do.</p>
+<p>Before starting, let’s import some useful stuffs and extensions.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ot">{-# LANGUAGE MonadComprehensions #-}</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span>           <span class="dt">Control.Applicative</span>            ( <span class="dt">Alternative</span>((&lt;|&gt;), empty) )</span></code></pre></div>
+<p>Let’s first define a traditional parser type:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">newtype</span> <span class="dt">Parser</span> a <span class="ot">=</span> <span class="dt">Parser</span> {<span class="ot">parse ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> (a, <span class="dt">String</span>)}</span></code></pre></div>
+<p>As usual, define <code>Functor</code> and <code>Applicative</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">instance</span> <span class="dt">Functor</span> <span class="dt">Parser</span> <span class="kw">where</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fmap</span> f (<span class="dt">Parser</span> p) <span class="ot">=</span> <span class="dt">Parser</span> <span class="op">$</span> \s <span class="ot">-&gt;</span> [ (f a, s') <span class="op">|</span> (a, s') <span class="ot">&lt;-</span> p s ]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">instance</span> <span class="dt">Applicative</span> <span class="dt">Parser</span> <span class="kw">where</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pure</span> a <span class="ot">=</span> <span class="dt">Parser</span> <span class="op">$</span> \s <span class="ot">-&gt;</span> <span class="fu">pure</span> (a, s)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Parser</span> f) <span class="op">&lt;*&gt;</span> (<span class="dt">Parser</span> p) <span class="ot">=</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Parser</span> <span class="op">$</span> \s <span class="ot">-&gt;</span> [ (a b, s'') <span class="op">|</span> (a, s') <span class="ot">&lt;-</span> f s, (b, s'') <span class="ot">&lt;-</span> p s' ]</span></code></pre></div>
+<p>Another useful typeclass is <code>Alternative</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">instance</span> <span class="dt">Alternative</span> <span class="dt">Parser</span> <span class="kw">where</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    empty <span class="ot">=</span> <span class="dt">Parser</span> <span class="op">$</span> <span class="fu">const</span> <span class="dt">Nothing</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">Parser</span> a) <span class="op">&lt;|&gt;</span> (<span class="dt">Parser</span> b) <span class="ot">=</span> <span class="dt">Parser</span> <span class="op">$</span> \s <span class="ot">-&gt;</span> a s <span class="op">&lt;|&gt;</span> b s</span></code></pre></div>
+<p>Now, we can define our parser combinators :D</p>
+<p>Let’s start with some useful higher order ones:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ot">satisfy ::</span> (<span class="dt">Char</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>) <span class="ot">-&gt;</span> <span class="dt">Parser</span> <span class="dt">Char</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>satisfy p <span class="ot">=</span> <span class="dt">Parser</span> <span class="op">$</span> \xs <span class="ot">-&gt;</span> <span class="kw">case</span> xs <span class="kw">of</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    []       <span class="ot">-&gt;</span> <span class="dt">Nothing</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    (s <span class="op">:</span> ss) <span class="ot">-&gt;</span> [ (s, ss) <span class="op">|</span> p s ]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ot">many ::</span> <span class="dt">Parser</span> a <span class="ot">-&gt;</span> <span class="dt">Parser</span> [a]</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>many p <span class="ot">=</span> <span class="dt">Parser</span> <span class="op">$</span> \s <span class="ot">-&gt;</span> <span class="kw">case</span> parse p s <span class="kw">of</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Nothing</span>      <span class="ot">-&gt;</span> <span class="dt">Just</span> ([], s)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Just</span> (a, s') <span class="ot">-&gt;</span> <span class="kw">case</span> parse (many p) s' <span class="kw">of</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Nothing</span>        <span class="ot">-&gt;</span> <span class="dt">Just</span> ([a], s')</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Just</span> (a', s'') <span class="ot">-&gt;</span> <span class="dt">Just</span> (a <span class="op">:</span> a', s'')</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">-- this is just `asum`</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="ot">choice ::</span> [<span class="dt">Parser</span> a] <span class="ot">-&gt;</span> <span class="dt">Parser</span> a</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>choice <span class="ot">=</span> <span class="fu">foldr</span> (<span class="op">&lt;|&gt;</span>) empty</span></code></pre></div>
+<p>Now, the more useful ones:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ot">char ::</span> <span class="dt">Char</span> <span class="ot">-&gt;</span> <span class="dt">Parser</span> <span class="dt">Char</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>char c <span class="ot">=</span> satisfy (<span class="op">==</span> c)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ot">string ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Parser</span> <span class="dt">String</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>string <span class="ot">=</span> <span class="fu">traverse</span> char</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="ot">many1 ::</span> <span class="dt">Parser</span> a <span class="ot">-&gt;</span> <span class="dt">Parser</span> [a]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>many1 p <span class="ot">=</span> (<span class="op">:</span>) <span class="op">&lt;$&gt;</span> p <span class="op">&lt;*&gt;</span> many p</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="ot">oneOf ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Parser</span> <span class="dt">Char</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>oneOf <span class="ot">=</span> choice <span class="op">.</span> <span class="fu">map</span> char</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="ot">spaces ::</span> <span class="dt">Parser</span> ()</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>spaces <span class="ot">=</span> many (oneOf <span class="st">&quot; \n\t&quot;</span>) <span class="op">*&gt;</span> <span class="fu">pure</span> ()</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="ot">digits ::</span> <span class="dt">Parser</span> <span class="dt">String</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>digits <span class="ot">=</span> many1 <span class="op">$</span> oneOf [<span class="ch">'0'</span> <span class="op">..</span> <span class="ch">'9'</span>]</span></code></pre></div>
+<p>And now we can do a small example to parse math expressions:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ot">expr ::</span> <span class="dt">Parser</span> <span class="dt">Int</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>expr <span class="ot">=</span> <span class="fu">flip</span> (<span class="op">$</span>) <span class="op">&lt;$&gt;</span> factor <span class="op">&lt;*&gt;</span> expr'</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">--  this is how we eliminate left recursion</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ot">expr' ::</span> <span class="dt">Parser</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>expr' <span class="ot">=</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    (\d f i <span class="ot">-&gt;</span> f (i <span class="op">+</span> d))</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;$&gt;</span> (char <span class="ch">'+'</span> <span class="op">*&gt;</span> factor)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;*&gt;</span> expr'</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;|&gt;</span> (\d f i <span class="ot">-&gt;</span> f (i <span class="op">-</span> d))</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;$&gt;</span> (char <span class="ch">'-'</span> <span class="op">*&gt;</span> factor)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;*&gt;</span> expr'</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;|&gt;</span> <span class="fu">pure</span> <span class="fu">id</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="ot">factor ::</span> <span class="dt">Parser</span> <span class="dt">Int</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>factor <span class="ot">=</span> <span class="fu">flip</span> (<span class="op">$</span>) <span class="op">&lt;$&gt;</span> term <span class="op">&lt;*&gt;</span> factor'</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="ot">factor' ::</span> <span class="dt">Parser</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>factor' <span class="ot">=</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    (\d f i <span class="ot">-&gt;</span> f (i <span class="op">*</span> d))</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;$&gt;</span> (char <span class="ch">'*'</span> <span class="op">*&gt;</span> term)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;*&gt;</span> expr'</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;|&gt;</span> (\d f i <span class="ot">-&gt;</span> f (i <span class="ot">`div`</span> d))</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;$&gt;</span> (char <span class="ch">'/'</span> <span class="op">*&gt;</span> term)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;*&gt;</span> expr'</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;|&gt;</span> <span class="fu">pure</span> <span class="fu">id</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="ot">term ::</span> <span class="dt">Parser</span> <span class="dt">Int</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>term <span class="ot">=</span> (<span class="fu">read</span> <span class="op">&lt;$&gt;</span> digits) <span class="op">&lt;|&gt;</span> char <span class="ch">'('</span> <span class="op">*&gt;</span> expr <span class="op">&lt;*</span> char <span class="ch">')'</span></span></code></pre></div>
+<p>Let give it a try!</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> parse expr <span class="st">&quot;(1+2)*(4/2)+6/(3-1)&quot;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Just</span> (<span class="dv">9</span>,<span class="st">&quot;&quot;</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> parse expr <span class="st">&quot;hello&quot;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="dt">Nothing</span></span></code></pre></div>
+<p>And we’re done XD</p>
+    </section>
+</article>
+
+</div>
+                <aside id="secondary" class="widget-area" role="complementary" aria-label="Blog Sidebar">
+	<section id="search-3" class="widget widget_search">
+
+    <!-- <form role="search" method="get" class="search-form" action="https://wp-themes.com/"> -->
+	  <!--   <label for="search-form-5a315d71e7d90"> -->
+		<!--     <span class="screen-reader-text">Search for:</span> -->
+	  <!--   </label> -->
+	  <!--   <input type="search" id="search-form-5a315d71e7d90" class="search-field" placeholder="Search …" value="" name="s"> -->
+	  <!--     <button type="submit" class="search-submit"><svg class="icon icon-search" aria-hidden="true" role="img"> <use href="#icon-search" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-search"></use> </svg><span class="screen-reader-text">Search</span></button> -->
+    <!--   </form> -->
+    <!-- </section> -->
+    <section id="archives-3" class="widget widget_archive">
+      <h2 class="widget-title">Pages</h2>
+      <ul>
+        <li><a href="../">Home</a></li>
+        <li><a href="../about.html">About</a></li>
+        <li><a href="../projects.html">Projects</a></li>
+        <li><a href="../archive.html">Archive</a></li>
+      </ul>
+    </section>
+
+    <section id="contacts-3" class="widget widget_recent_entries">
+      <h2 class="widget-title">Contacts</h2>
+      <ul>
+        <li><a href="https://github.com/Meowcolm024">Github</a></li>
+        <li><a href="https://flic.kr/ps/38kXTc">Flickr</a></li>
+		  </ul>
+		</section>
+
+    <section id="recent-posts-3" class="widget widget_recent_entries">
+      <h2 class="widget-title">Recent Posts</h2>
+      <ul>
+        <li><a href="../posts/2022-02-08-applicative-parser.html" title="Applicative Parser">Applicative Parser</a></li>
+<li><a href="../posts/2020-10-20-embed-test.html" title="Embed Test">Embed Test</a></li>
+<li><a href="../posts/2020-09-15-building-mirror-site.html" title="Building Mirror Site">Building Mirror Site</a></li>
+<li><a href="../posts/2020-07-24-%E8%BF%99%E7%9C%9F%E7%9A%84%E5%8F%AA%E6%98%AFhaskell%E5%93%A6.html" title="这真的只是Haskell哦">这真的只是Haskell哦</a></li>
+<li><a href="../posts/2020-07-12-%E4%B8%AD%E6%96%87%E6%B5%8B%E8%AF%95.html" title="中文测试">中文测试</a></li>
+<li><a href="../posts/2020-07-09-test.html" title="Test">Test</a></li>
+<li><a href="../posts/2020-07-09-hi.html" title="Hi">Hi</a></li>
+
+		  </ul>
+    </section>
+
+  <!--   <section id="categories-3" class="widget widget_categories"> -->
+  <!--     <h2 class="widget-title">Categories</h2>		<ul> -->
+	<!--     <li class="cat-item cat-item-6"> -->
+  <!--       <a href="#">First Child Category</a> -->
+  <!--     </li> -->
+	<!-- 	</ul> -->
+  <!--   </section> -->
+  </aside>
+
+            </div>
+            </div>
+
+          <footer id="colophon" class="site-footer" role="contentinfo">
+            <div class="wrap">
+              <div class="site-info">
+              Site proudly generated by
+              <a href="http://jaspervdj.be/hakyll">Hakyll</a>.
+              Theme provided by <a href="https://github.com/katychuang/wp-twentyseventeen">katychuang </a>
+              </div>
+            </div>
+          </footer>
+
+        </main>
+      </div>
+    </body>
+</html>
